@@ -22,12 +22,12 @@ def run(playwright: Playwright) -> None:
     time.sleep(5)  
     
     page.goto(url="https://el.dhlottery.co.kr/game/pension720/game.jsp")
-    # "비정상적인 방법으로 접속하였습니다. 정상적인 PC 환경에서 접속하여 주시기 바랍니다." 우회하기
-    # try:
-    #     page.locator("#popupLayerAlert").get_by_role("button", name="확인").click()
-    #     print(page.content())
-    # except:
-    #     print("비정상환경 접속 주의 팝업 없음") 
+    "비정상적인 방법으로 접속하였습니다. 정상적인 PC 환경에서 접속하여 주시기 바랍니다." 우회하기
+    try:
+        page.locator("#popupLayerAlert").get_by_role("button", name="확인").click()
+        print(page.content())
+    except:
+        print("비정상환경 접속 주의 팝업 없음") 
     
     page.click("text=자동번호")
     page.click("text=선택완료")
