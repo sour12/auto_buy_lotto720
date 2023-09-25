@@ -4,12 +4,13 @@
 on:
   # push:
   #   branches: [ "main" ]
-  schedule:
-    # - cron: '30 1 * * 1'  # UTC 1:30(월) > KST 10:30(월)
-    # - cron: '30 1 * * 3'  # UTC 1:30(수) > KST 10:30(수)  
-    # - cron: '30 1 * * 5'  # UTC 1:30(금) > KST 10:30(금)
+  schedule: 
+    - cron: '30 1 * * 5'  # UTC 1:30(금) > KST 10:30(금)
     - cron: '30 1 * * 6'  # UTC 1:30(토) > KST 10:30(토)
-    - cron: '30 1 * * 2'  # UTC 1:30(화) > KST 10:30(화) 
+    - cron: '30 1 * * 0'  # UTC 1:30(일) > KST 10:30(일) 
+
+permissions:
+  actions: write
 
 jobs:
   build:
@@ -47,12 +48,38 @@ jobs:
         wget https://chromedriver.storage.googleapis.com/100.0.4896.20/chromedriver_linux64.zip
         unzip ./chromedriver_linux64.zip           
 
+    - run: mkdir -p ./lotto720
+    
+    - name: Restore Cache
+      id: cache-restore
+      uses: actions/cache/restore@v3
+      with:
+        path: ./lotto720
+        key: auto_buy_lotto720
+
     - name: Run Script      
       run: |
         date
         date '+%u'
-        if [ "$(date '+%u')" -eq 6 ]; then
-          python ./buy_lotto720.py ${{secrets.USER_ID}} ${{secrets.USER_PW}}
-        elif [ "$(date '+%u')" -eq 2 ]; then
-          python ./buy_lotto720.py ${{secrets.USER_ID_2}} ${{secrets.USER_PW_2}}
-        fi
+        # if [ "$(date '+%u')" -eq 5 ]; then
+        #   python ./crawling_lotto720.py
+        # elif [ "$(date '+%u')" -eq 6 ]; then
+        #   python ./buy_lotto720.py ${{secrets.USER_ID}} ${{secrets.USER_PW}}
+        # elif [ "$(date '+%u')" -eq 7 ]; then
+        #   python ./buy_lotto720.py ${{secrets.USER_ID_2}} ${{secrets.USER_PW_2}}
+        # fi
+
+    - name: Delete Previous Cache
+      if: ${{ steps.cache-restore.outputs.cache-hit }}
+      continue-on-error: true
+      run: |
+        gh extension install actions/gh-actions-cache
+        gh actions-cache delete "auto_buy_lotto720" --confirm
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+    - name: Save Cache
+      uses: actions/cache/save@v3
+      with:
+        path: ./lotto720
+        key: auto_buy_lotto720
