@@ -2,15 +2,9 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
 on:
-  # push:
-  #   branches: [ "main" ]
   schedule: 
     - cron: '30 1 * * 5'  # UTC 1:30(금) > KST 10:30(금)
-    - cron: '30 1 * * 6'  # UTC 1:30(토) > KST 10:30(토)
-    - cron: '30 1 * * 0'  # UTC 1:30(일) > KST 10:30(일) 
-
-permissions:
-  actions: write
+    - cron: '30 1 * * 6'  # UTC 1:30(토) > KST 10:30(토) 
 
 jobs:
   build:
@@ -35,8 +29,6 @@ jobs:
         pip install gspread        
         pip install --upgrade google-api-python-client oauth2client
         pip install playwright
-        pip install beautifulsoup4
-        pip install lxml
         python -m playwright install ${{ matrix.browser-channel }} --with-deps
     
     - name: Install ubuntu package
@@ -48,38 +40,12 @@ jobs:
         wget https://chromedriver.storage.googleapis.com/100.0.4896.20/chromedriver_linux64.zip
         unzip ./chromedriver_linux64.zip           
 
-    - run: mkdir -p ./lotto720
-    
-    - name: Restore Cache
-      id: cache-restore
-      uses: actions/cache/restore@v3
-      with:
-        path: ./lotto720
-        key: auto_buy_lotto720
-
     - name: Run Script      
       run: |
         date
         date '+%u'
-        # if [ "$(date '+%u')" -eq 5 ]; then
-        #   python ./crawling_lotto720.py
-        # elif [ "$(date '+%u')" -eq 6 ]; then
-        #   python ./buy_lotto720.py ${{secrets.USER_ID}} ${{secrets.USER_PW}}
-        # elif [ "$(date '+%u')" -eq 7 ]; then
-        #   python ./buy_lotto720.py ${{secrets.USER_ID_2}} ${{secrets.USER_PW_2}}
-        # fi
-
-    - name: Delete Previous Cache
-      if: ${{ steps.cache-restore.outputs.cache-hit }}
-      continue-on-error: true
-      run: |
-        gh extension install actions/gh-actions-cache
-        gh actions-cache delete "auto_buy_lotto720" --confirm
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
-    - name: Save Cache
-      uses: actions/cache/save@v3
-      with:
-        path: ./lotto720
-        key: auto_buy_lotto720
+        if [ "$(date '+%u')" -eq 5 ]; then
+          python ./buy_lotto720.py ${{secrets.USER_ID}} ${{secrets.USER_PW}}
+        elif [ "$(date '+%u')" -eq 6 ]; then
+          python ./buy_lotto720.py ${{secrets.USER_ID_2}} ${{secrets.USER_PW_2}}
+        fi
